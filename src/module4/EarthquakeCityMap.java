@@ -1,7 +1,9 @@
 package module4;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.fhpotsdam.unfolding.UnfoldingMap;
 import de.fhpotsdam.unfolding.data.Feature;
@@ -11,8 +13,8 @@ import de.fhpotsdam.unfolding.geo.Location;
 import de.fhpotsdam.unfolding.marker.AbstractShapeMarker;
 import de.fhpotsdam.unfolding.marker.Marker;
 import de.fhpotsdam.unfolding.marker.MultiMarker;
-import de.fhpotsdam.unfolding.providers.Google;
 import de.fhpotsdam.unfolding.providers.MBTilesMapProvider;
+import de.fhpotsdam.unfolding.providers.Microsoft;
 import de.fhpotsdam.unfolding.utils.MapUtils;
 import parsing.ParseFeed;
 import processing.core.PApplet;
@@ -20,8 +22,9 @@ import processing.core.PApplet;
 /** EarthquakeCityMap
  * An application with an interactive map displaying earthquake data.
  * Author: UC San Diego Intermediate Software Development MOOC team
- * @author Your name here
+ * @author James Liu
  * Date: July 17, 2015
+ * Date: 08 December 2016
  * */
 public class EarthquakeCityMap extends PApplet {
 	
@@ -68,7 +71,7 @@ public class EarthquakeCityMap extends PApplet {
 		    earthquakesURL = "2.5_week.atom";  // The same feed, but saved August 7, 2015
 		}
 		else {
-			map = new UnfoldingMap(this, 200, 50, 650, 600, new Google.GoogleMapProvider());
+			map = new UnfoldingMap(this, 200, 50, 650, 600, new Microsoft.AerialProvider());
 			// IF YOU WANT TO TEST WITH A LOCAL FILE, uncomment the next line
 		    //earthquakesURL = "2.5_week.atom";
 		}
@@ -134,24 +137,35 @@ public class EarthquakeCityMap extends PApplet {
 	private void addKey() {	
 		// Remember you can use Processing's graphics methods here
 		fill(255, 250, 240);
-		rect(25, 50, 150, 250);
+		rect(25, 50, 150, 500);
 		
 		fill(0);
 		textAlign(LEFT, CENTER);
 		textSize(12);
 		text("Earthquake Key", 50, 75);
 		
-		fill(color(255, 0, 0));
-		ellipse(50, 125, 15, 15);
+		fill(color(164,0,0));
+		triangle(50,125,42,135,58,135);
+		fill(color(255, 255, 255));
+		ellipse(50, 175, 20, 20);
+		fill(color(255, 255, 255));
+		rect(40, 215, 20, 20);
+		
+		fill(color(0, 100, 100));
+		ellipse(50, 325, 20, 20);
 		fill(color(255, 255, 0));
-		ellipse(50, 175, 10, 10);
-		fill(color(0, 0, 255));
-		ellipse(50, 225, 5, 5);
+		ellipse(50, 375, 20, 20);
+		fill(color(255, 0, 0));
+		ellipse(50, 425, 20, 20);
 		
 		fill(0, 0, 0);
-		text("5.0+ Magnitude", 75, 125);
-		text("4.0+ Magnitude", 75, 175);
-		text("Below 4.0", 75, 225);
+		text("City Marker", 75, 125);
+		text("Landquake", 75, 175);
+		text("Oceanquake", 75, 225);
+		text("Size-Magnitude", 50, 275);
+		text("Shallow", 75, 325);
+		text("Intermediate", 75, 375);
+		text("Deep", 75, 425);
 	}
 
 	
@@ -166,8 +180,15 @@ public class EarthquakeCityMap extends PApplet {
 		
 		// TODO: Implement this method using the helper method isInCountry
 		
+		for(Marker country : countryMarkers)
+		{
+			if(isInCountry(earthquake,country))
+			{
+				return true;
+			}
+		}
 		// not inside any country
-		return false;
+		return false;	
 	}
 	
 	// prints countries with number of earthquakes
@@ -179,6 +200,43 @@ public class EarthquakeCityMap extends PApplet {
 	private void printQuakes() 
 	{
 		// TODO: Implement this method
+		int oceanQuakeCount = 0;
+		//use map to record the times of earthquake happened in each country 
+		Map <String,String> earthquakeCountrys = new HashMap <String,String> ();
+		for(Marker quake : quakeMarkers)
+		{
+			Map <String,Object> quakeProperties = quake.getProperties();
+			
+			if(quakeProperties.containsKey("country")) // happened on land
+			{
+				String countryName = quake.getProperty("country").toString();
+				if(earthquakeCountrys.containsKey(countryName))
+				{
+					int count = Integer.parseInt(earthquakeCountrys.get(countryName));
+					count ++;
+					earthquakeCountrys.put(countryName, Integer.toString(count));
+				}
+				else
+				{
+					earthquakeCountrys.put(countryName, Integer.toString(1));
+				}
+				
+			}
+			else
+			{
+				oceanQuakeCount ++;
+			}
+		}
+		
+		
+		for(Map.Entry<String, String> country : earthquakeCountrys.entrySet())
+		{
+			System.out.println(country.getKey() + " : " + country.getValue());
+		}
+		
+		
+		System.out.println("ocean earthquake : " + oceanQuakeCount);
+		
 	}
 	
 	

@@ -11,6 +11,7 @@ import de.fhpotsdam.unfolding.geo.Location;
 import de.fhpotsdam.unfolding.marker.AbstractShapeMarker;
 import de.fhpotsdam.unfolding.marker.Marker;
 import de.fhpotsdam.unfolding.marker.MultiMarker;
+import de.fhpotsdam.unfolding.marker.SimplePointMarker;
 import de.fhpotsdam.unfolding.providers.Google;
 import de.fhpotsdam.unfolding.providers.MBTilesMapProvider;
 import de.fhpotsdam.unfolding.utils.MapUtils;
@@ -20,7 +21,7 @@ import processing.core.PApplet;
 /** EarthquakeCityMap
  * An application with an interactive map displaying earthquake data.
  * Author: UC San Diego Intermediate Software Development MOOC team
- * @author Your name here
+ * @author James Liu
  * Date: July 17, 2015
  * */
 public class EarthquakeCityMap extends PApplet {
@@ -146,6 +147,26 @@ public class EarthquakeCityMap extends PApplet {
 	private void selectMarkerIfHover(List<Marker> markers)
 	{
 		// TODO: Implement this method
+		if(lastSelected == null)
+		{
+			for(Marker quakeMarker : markers)
+			{
+				if(quakeMarker.isInside(map, this.mouseX, this.mouseY))
+				{
+					lastSelected = (CommonMarker) quakeMarker;
+					lastSelected.setSelected(true);
+					break;
+				}
+				else
+				{
+					continue;
+				}
+			}
+		}
+		else
+		{
+			
+		}
 	}
 	
 	/** The event handler for mouse clicks

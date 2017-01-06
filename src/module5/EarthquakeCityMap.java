@@ -14,6 +14,7 @@ import de.fhpotsdam.unfolding.marker.MultiMarker;
 import de.fhpotsdam.unfolding.marker.SimplePointMarker;
 import de.fhpotsdam.unfolding.providers.Google;
 import de.fhpotsdam.unfolding.providers.MBTilesMapProvider;
+import de.fhpotsdam.unfolding.providers.Microsoft;
 import de.fhpotsdam.unfolding.utils.MapUtils;
 import parsing.ParseFeed;
 import processing.core.PApplet;
@@ -71,7 +72,7 @@ public class EarthquakeCityMap extends PApplet {
 		    earthquakesURL = "2.5_week.atom";  // The same feed, but saved August 7, 2015
 		}
 		else {
-			map = new UnfoldingMap(this, 200, 50, 650, 600, new Google.GoogleMapProvider());
+			map = new UnfoldingMap(this, 200, 50, 650, 600, new Microsoft.AerialProvider());
 			// IF YOU WANT TO TEST WITH A LOCAL FILE, uncomment the next line
 		    //earthquakesURL = "2.5_week.atom";
 		}
@@ -180,6 +181,98 @@ public class EarthquakeCityMap extends PApplet {
 		// TODO: Implement this method
 		// Hint: You probably want a helper method or two to keep this code
 		// from getting too long/disorganized
+		
+		
+				if (lastClicked != null) {
+					// clear the last click and unhide all
+					lastClicked.setClicked(false);
+					lastClicked = null;
+					unhideMarkers();
+				}
+				else
+				{
+					setClickedIfMouseClicked(quakeMarkers);
+					if(lastClicked == null)
+					{
+						setClickedIfMouseClicked(cityMarkers);
+					}
+					if(lastClicked != null)
+					{
+						hideMarkers(lastClicked);
+					}
+				}
+	}
+	
+	
+	private void setClickedIfMouseClicked(List<Marker> markers)
+	{
+		
+		if(lastClicked == null)
+		{
+			for(Marker quakeMarker : markers)
+			{
+				if(quakeMarker.isInside(map, this.mouseX, this.mouseY))
+				{
+					lastClicked = (CommonMarker) quakeMarker;
+					lastClicked.setClicked(true);
+					break;
+				}
+				else
+				{
+					continue;
+				}
+			}
+		}
+		else
+		{
+			
+		}
+		
+	}
+	
+	private void hideMarkers(Marker clickedMarker)
+	{
+		if(clickedMarker instanceof EarthquakeMarker)
+		{
+			EarthquakeMarker clickedEarthquake = (EarthquakeMarker) clickedMarker;
+			
+			for(Marker quakeMarker : quakeMarkers)
+			{
+				quakeMarker.setHidden(true);
+			}
+			
+			clickedEarthquake.setHidden(false);
+			
+			for(Marker cityMarker : cityMarkers)
+			{
+				if(cityMarker.getDistanceTo(clickedMarker.getLocation()) > clickedEarthquake.threatCircle())
+				{
+					cityMarker.setHidden(true);
+				}
+			}
+			
+		}
+		else //is a city marker
+		{
+			
+			for(Marker cityMarker : cityMarkers)
+			{
+				cityMarker.setHidden(true);
+			}
+			
+			clickedMarker.setHidden(false);
+			
+			for(Marker quakeMarker : quakeMarkers)
+			{
+				EarthquakeMarker currentQuake = (EarthquakeMarker) quakeMarker;
+				if(currentQuake.getDistanceTo(clickedMarker.getLocation()) > currentQuake.threatCircle())
+				{
+					currentQuake.setHidden(true);
+				}
+			}
+			
+			System.out.print(clickedMarker.getId());
+		}
 	}
 	
 	
